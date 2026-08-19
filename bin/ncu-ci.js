@@ -142,6 +142,13 @@ const args = yargs(hideBin(process.argv))
         .positional('url', {
           describe: 'URL of the PR or the CI',
           type: 'string'
+        })
+        .option('full', {
+          type: 'boolean',
+          default: false,
+          describe: 'Include the full console output of the failures in the ' +
+                    'markdown written with --markdown instead of truncated ' +
+                    'excerpts'
         });
     },
     handler
@@ -381,6 +388,7 @@ class CICommand {
           throw new Error(`Unknown job type ${job.type}`);
       }
 
+      build.full = argv.full;
       await build.getResults();
       build.display();
 
@@ -392,7 +400,7 @@ class CICommand {
       }
 
       if (argv.markdown && !argv.stats) {
-        this.markdown += build.formatAsMarkdown();
+        this.markdown += build.formatAsMarkdown(argv.full);
       }
     }
   }

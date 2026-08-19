@@ -243,6 +243,15 @@ Author     Shelley Vohr <shelley.vohr@gmail.com>
 Unstable   https://ci.nodejs.org/job/node-test-commit-arm-fanned/15155/
 ```
 
+When the results are written to a file with `--markdown <path>`, the failure
+output embedded in the markdown is truncated to a short excerpt of the console
+log by default. Pass `--full` to embed the complete console output of each
+failure instead:
+
+```sh
+ncu-ci url https://github.com/nodejs/node/pull/34127 --markdown results.md --full
+```
+
 ### `ncu-ci benchmark <jobid>` 
 
 `ncu-ci benchmark <jobid>` displays the results of a specified `benchmark-node-micro-benchmarks` CI job. See `ncu-ci benchmark --help` for more.

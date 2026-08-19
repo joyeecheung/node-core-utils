@@ -67,6 +67,39 @@ describe('Jenkins', () => {
     );
   });
 
+  it('should not truncate markdown output when full is set', async() => {
+    tmpdir.refresh();
+    const prefix = ['jenkins', 'js-flake-1'];
+    const fixturesDir = getFixturesDir(prefix);
+    copyShallow(fixturesDir, tmpdir.path);
+    jobCache.dir = tmpdir.path;
+    jobCache.enable();
+
+    const cli = new TestCLI();
+    const request = {
+      // any attempt to call method on this would throw
+    };
+    const prBuild = new PRBuild(cli, request, 15363);
+    prBuild.full = true;
+    await prBuild.getResults();
+
+    // The full console text of the failed run should be embedded.
+    const consoleText = fixtures.readFile(
+      ...prefix, 'node-test-commit-linux-nodes=debian9-64-19446.txt'
+    );
+    const fullMarkdown = prBuild.formatAsMarkdown(true);
+    assert.ok(fullMarkdown.includes(consoleText));
+
+    // Without the flag the output is still truncated.
+    const expectedPrMd = fixtures.readFile(...prefix, 'expected-pr.md');
+    assert.strictEqual(prBuild.formatAsMarkdown(), expectedPrMd);
+    assert.strictEqual(prBuild.formatAsMarkdown(false), expectedPrMd);
+
+    // The JSON output should not contain the full console text.
+    const expectedPrJson = fixtures.readJSON(...prefix, 'expected-pr.json');
+    assert.deepStrictEqual(prBuild.formatAsJson(), expectedPrJson);
+  });
+
   it('should get successful PR build and commit build', async() => {
     tmpdir.refresh();
     const prefix = ['jenkins', 'success'];
